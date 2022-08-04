@@ -122,7 +122,7 @@ func installKey(path string) error {
 	return nil
 }
 
-func Mst() {
+func Sti() {
 	//go build -ldflags "-X main.IP={IP}"
 
 	// get current home directory
