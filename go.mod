@@ -1,3 +1,3 @@
-module example.com/goMst
+module example.com/goSti
 
 go 1.18
