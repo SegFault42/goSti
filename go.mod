@@ -1,3 +1,3 @@
-module github.com/SegFault42/goSti
+module github.com/segfault42/goSti
 
 go 1.18
